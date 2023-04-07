@@ -1,0 +1,29 @@
+---
+title: "Project"
+author: "Brandon Sucher"
+date: "2023-04-07"
+output: html_document
+---
+
+Read in data
+```{r}
+features_test <- read.csv("dengue_features_test.csv")
+features_train <- read.csv("dengue_features_train.csv")
+labels_train <- read.csv("dengue_labels_train.csv")
+```
+
+Test some automated EDA
+```{r}
+pacman::p_load(tidyverse, DataExplorer, tableone)
+all_train <- left_join(features_train, labels_train, by = c("city", "year", "weekofyear"))
+
+all_train %>% create_report(output_file = "EDA",
+                            report_title = "EDA Report - Dengue Data",
+                            y = "total_cases")
+
+CreateTableOne(vars = colnames(select(all_train, -c("city", "year", "weekofyear",
+                                                    "week_start_date"))),
+               strata = c("city"),
+               data = all_train)
+```
+
