@@ -27,3 +27,14 @@ CreateTableOne(vars = colnames(select(all_train, -c("city", "year", "weekofyear"
                data = all_train)
 ```
 
+Notes:
+- ndvi_ne has 13% missingness but 191/194 missing values in that variable are from San Juan, PR. Which makes that 20.4% missingness of this variable for SJ.
+- There's a few outliers of total_cases. We'll have to decide how to treat these.
+- But station precipitation kind of follows the same trend...
+- reanalysis_tdr_k also seems like to have some interesting diagnostics...
+- total_cases not strongly correlated with any one variable
+- the higher number of total_cases were really only in 2 different years
+- Big difference in precipiation amount between SJ and IQ
+- Also a huge difference between total_cases average between the two cities
+- Station precipitation is also much higher in IQ than SJ but total_cases much lower in IQ than SJ
+
