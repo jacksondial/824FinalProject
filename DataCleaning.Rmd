@@ -1,0 +1,45 @@
+---
+title: "DataCleaning"
+author: "Jackson Dial"
+date: '2023-03-05'
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Dependencies
+
+```{r}
+library(readr)
+library(dplyr)
+```
+
+## Set working directory
+
+```{r}
+setwd("C:/Users/jacks/OneDrive/Desktop/DUKE_SPRING2023/824FinalProject/824FinalProject")
+```
+
+## Read in data
+
+```{r}
+features_train <- read_csv("dengue_features_train.csv")
+labels_train <- read_csv("dengue_labels_train.csv")
+features_test <- read_csv("dengue_features_test.csv")
+```
+
+```{r}
+features_train %>% 
+  mutate(sum_satellite = (ndvi_ne + ndvi_nw + ndvi_se + ndvi_sw)) %>% 
+  select(ndvi_ne, ndvi_nw, ndvi_se, ndvi_sw, sum_satellite)
+```
+
+```{r}
+table(features_test$city, features_test$year)
+```
+
+

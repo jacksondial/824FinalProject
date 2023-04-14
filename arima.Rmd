@@ -1,0 +1,36 @@
+---
+title: "ARIMA"
+author: "Jackson Dial"
+date: '2023-04-13'
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# install.packages("forecast")
+library(dplyr)
+library(forecast)
+```
+
+The purpose of this document is to create an ARIMA (Auto-Regressive Integrated Moving Average) model.
+
+```{r}
+# create time series object
+date <- as.Date("1990-04-30")
+
+# Extract the week of the year
+week <- format(date, "%U")
+week
+
+all_data <- labels_train
+
+ts_obj <- ts(labels_train$total_cases, frequency = 52, start = c(1990, 18)) # the start date was the 17th time period of that year, where time period is defined by the frequency argument
+
+arima <- auto.arima()
+```
+
