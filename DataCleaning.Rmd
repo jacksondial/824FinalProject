@@ -40,6 +40,9 @@ features_train %>%
 
 ```{r}
 table(features_test$city, features_test$year)
+
+table(features_train$city, features_train$year)
+
 ```
 
 

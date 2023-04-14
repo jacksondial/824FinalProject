@@ -15,9 +15,13 @@ knitr::opts_chunk$set(echo = TRUE)
 # install.packages("forecast")
 library(dplyr)
 library(forecast)
+library(ggplot2)
+library(beepr)
 ```
 
 The purpose of this document is to create an ARIMA (Auto-Regressive Integrated Moving Average) model.
+
+
 
 ```{r}
 # create time series object
@@ -27,10 +31,89 @@ date <- as.Date("1990-04-30")
 week <- format(date, "%U")
 week
 
-all_data <- labels_train
+all_data <- features_train %>% left_join(labels_train, by = c("year", "weekofyear", "city"))
+```
 
-ts_obj <- ts(labels_train$total_cases, frequency = 52, start = c(1990, 18)) # the start date was the 17th time period of that year, where time period is defined by the frequency argument
+```{r both cities}
+ggplot(all_data, aes(x = week_start_date, y = total_cases, col = as.factor(city)))+
+  geom_line()+
+  labs(x = "Time",
+       y = "Total Cases",
+       col = "City",
+       title = "Cases Over Time",
+       subtitle = "Both Cities")+
+  scale_color_manual(values = c("dodgerblue", "forestgreen"),
+    labels = c("Iquitos", "San Juan"))
+```
 
-arima <- auto.arima()
+```{r just iquitos}
+all_data %>% filter(city == "iq") %>% 
+  ggplot(aes(x = week_start_date, y = total_cases, col = city))+
+  geom_line()+
+  labs(x = "Time",
+       y = "Total Cases",
+       title = "Cases Over Time",
+       subtitle = "Only Iquitos")+
+  scale_color_manual(values = "dodgerblue")+
+  theme(legend.position = "none")
+```
+
+## Iquitos
+
+```{r}
+iq_all <- all_data %>% filter(city == "iq")
+iq_ts_obj <- ts(iq_all$total_cases, frequency = 52, start = c(2000, 26))
+iq_arima <- auto.arima(iq_ts_obj)
+beep()
+summary(iq_arima)
+```
+
+```{r}
+iq_residuals <- residuals(iq_arima)
+par(mfrow = c(2,2))
+
+# Plot the residuals over time
+plot(iq_residuals, type = "l", main = "Residuals of ARIMA(0,1,2) Model")
+
+# Create a histogram of the residuals
+hist(iq_residuals, breaks = 10, main = "Histogram of Residuals")
+
+# Create a density plot of the residuals
+plot(density(iq_residuals), main = "Density Plot of Residuals")
+
+# Create a Q-Q plot of the residuals
+qqnorm(iq_residuals)
+qqline(iq_residuals)
+
+```
+
+
+## San Juan
+
+
+```{r}
+
+sj_all <- all_data %>% filter(city == "sj")
+sj_ts_obj <- ts(sj_all$total_cases, frequency = 52, start = c(1990, 18))
+sj_arima <- auto.arima(sj_ts_obj)
+summary(sj_arima)
+```
+
+```{r}
+sj_residuals <- residuals(sj_arima)
+
+par(mfrow = c(2,2))
+# Plot the residuals over time
+plot(sj_residuals, type = "l", main = "Residuals of ARIMA(1,1,1) Model")
+
+# Create a histogram of the residuals
+hist(sj_residuals, breaks = 10, main = "Histogram of Residuals")
+
+# Create a density plot of the residuals
+plot(density(sj_residuals), main = "Density Plot of Residuals")
+
+# Create a Q-Q plot of the residuals
+qqnorm(sj_residuals)
+qqline(sj_residuals)
 ```
 
