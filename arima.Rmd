@@ -63,8 +63,11 @@ all_data %>% filter(city == "iq") %>%
 ```{r}
 iq_all <- all_data %>% filter(city == "iq")
 iq_ts_obj <- ts(iq_all$total_cases, frequency = 52, start = c(2000, 26))
-iq_arima <- auto.arima(iq_ts_obj)
-beep()
+iq_all_features <- features_train %>% filter(city == "iq") %>% 
+  select(ndvi_ne:station_precip_mm) %>% 
+  subset(select = -c(precipitation_amt_mm))
+
+iq_arima <- auto.arima(iq_ts_obj,xreg = as.matrix(iq_all_features))
 summary(iq_arima)
 ```
 
@@ -88,14 +91,35 @@ qqline(iq_residuals)
 ```
 
 
+```{r iquitos preds}
+test_iq_date <- features_test %>% filter(city == "iq") %>% select(week_start_date)
+iq_test <- features_test %>% filter(city == "iq")
+
+iq_pred_date <- cbind(test_iq_date, iq_preds)
+
+iq_test <- features_test %>% filter(city == "iq")%>% 
+  select(ndvi_ne:station_precip_mm) %>% 
+  subset(select = -c(precipitation_amt_mm))
+iq_preds <- forecast(iq_arima, h = 260, xreg = as.matrix(iq_test) )
+
+iq_pred_date <- cbind(test_iq_date, iq_preds)
+
+ggplot(iq_pred_date, aes(x = week_start_date, y = `Point Forecast`))+
+  geom_line()
+```
+
 ## San Juan
 
 
 ```{r}
-
 sj_all <- all_data %>% filter(city == "sj")
 sj_ts_obj <- ts(sj_all$total_cases, frequency = 52, start = c(1990, 18))
-sj_arima <- auto.arima(sj_ts_obj)
+# sj_arima <- auto.arima(sj_ts_obj)
+sj_all_features <- features_train %>% filter(city == "sj") %>% 
+  select(ndvi_ne:station_precip_mm) %>% 
+  subset(select = -c(precipitation_amt_mm))
+
+sj_arima <- auto.arima(sj_ts_obj,xreg = as.matrix(sj_all_features))
 summary(sj_arima)
 ```
 
@@ -115,5 +139,35 @@ plot(density(sj_residuals), main = "Density Plot of Residuals")
 # Create a Q-Q plot of the residuals
 qqnorm(sj_residuals)
 qqline(sj_residuals)
+```
+
+## Predictions
+
+```{r}
+# how many weeks do we want to predict for iquitos?
+features_test %>% 
+  filter(city == "iq") %>% 
+  nrow()
+#156 for iquitos
+
+features_test %>% 
+  filter(city == "sj") %>% 
+  nrow()
+#260 for san juan
+```
+
+```{r sanjuan preds}
+summary(sj_test)
+
+test_sj_date <- features_test %>% filter(city == "sj") %>% select(week_start_date)
+sj_test <- features_test %>% filter(city == "sj")%>% 
+  select(ndvi_ne:station_precip_mm) %>% 
+  subset(select = -c(precipitation_amt_mm))
+sj_preds <- forecast(sj_arima, h = 260, xreg = as.matrix(sj_test) )
+
+sj_pred_date <- cbind(test_sj_date, sj_preds)
+
+ggplot(sj_pred_date, aes(x = week_start_date, y = `Point Forecast`))+
+  geom_line()
 ```
 
